@@ -121,8 +121,8 @@ def dayofY_toTimeStamp(df):
 #---------------------------------------- 
 
 
-indir0 = 'input/'
-outdir = 'output/'
+indir0 = 'data/v0.original/'
+outdir = 'data/v01.timestamp/'
 
 
 tlabel = 'TIMESTAMP'

@@ -40,13 +40,35 @@ def pickup_timename(timestamp):
  
    return timeframe
 
-def addheaders(filename1,filename2,head,inum):
+def save_csv_file(dat,outdir,iyr,filename,head):
 
-   with open(filename1+".csv", "r") as infile:
+    tmpdir = 'tmp/'
+    filelist = glob.glob(os.path.join(tmpdir, "*"))
+    for f in filelist:
+        os.remove(f)
+
+    dat.to_csv(tmpdir+filename+'.csv',index=True, na_rep='NAN')
+
+    # add header information to the datasets
+    fla = tmpdir+os.path.splitext(filename)[0]
+    addheaders(fla,fla+'.2','.csv',head[0],0)
+    addheaders(fla+'.2',fla+'.3','.csv',head[2],2)
+
+    # save the dataset in the 'outdir' directory
+    newfile = outdir+iyr+'/'+filename
+    filen = newfile + '.csv'
+    os.system('rm '+filen)
+
+    addheaders(fla+'.3',newfile,'.csv',head[3],3)
+    print(newfile+'.csv')
+
+def addheaders(filename1,filename2,ext,head,inum):
+
+   with open(filename1+ext, "r") as infile:
      reader = list(csv.reader(infile))
      reader.insert(inum, head)
 
-   with open(filename2+".csv", "w") as outfile:
+   with open(filename2+ext, "w") as outfile:
      writer = csv.writer(outfile)
      for line in reader:
          writer.writerow(line)
@@ -61,17 +83,18 @@ def dayofY_toTimeStamp(df,deltt):
 #---------------------------------------- 
 
 indir0 = 'output/'
-outdir0 = 'output.v02/'
+outdir = 'output.v02/'
 
 #indir0 = 'input/'
-#outdir0 = 'output/'
+#outdir = 'output/'
 
 tmpdir = 'tmp/'
 
 allyears = pd.Series([elem.replace(indir0,'') for elem in pd.Series(glob.glob(indir0+"*"))])
 print(allyears)
 
-for it in range(0,len(allyears)):
+#for it in range(0,len(allyears)):
+for it in range(0,1):
  
   iyr = allyears[it]
 
@@ -79,13 +102,14 @@ for it in range(0,len(allyears)):
   alllocates = pd.Series([elem.replace(findir,'') for elem in pd.Series(glob.glob(findir+"*"))])
   print(alllocates)
 
-  for ii in range(0,len(alllocates)):
+#  for ii in range(0,len(alllocates)):
+  for ii in range(0,1):
 
-        locatename = os.path.splitext(alllocates.iloc[ii])[0]
-        print(locatename)
+        locname = os.path.splitext(alllocates.iloc[ii])[0]
+        print(locname)
 
         #print(' ----- Read CSV file ------')
-        df = pd.read_csv(findir + '/'+ locatename +'.csv'\
+        df = pd.read_csv(findir + '/'+ locname +'.csv'\
           , delimiter = ',', skiprows=[0,2,3], na_values = ['NAN','"NAN"'], header=0, low_memory=False)
         print(df)
 
@@ -93,7 +117,7 @@ for it in range(0,len(allyears)):
 
         stid = df.SiteNum
 
-        hfile = findir+locatename+'.csv'
+        hfile = findir+locname+'.csv'
         with open(hfile, "r") as infile:
             head = list(csv.reader(infile))[0:4]
 
@@ -122,28 +146,18 @@ for it in range(0,len(allyears)):
 
         newdf = pd.concat([newdf,tmp],axis=1)
 
-        #--- create a new file name
-
-        timeframe = pickup_timename(timestamp)   
-
-        outdir = outdir0+iyr+'/'
-        sys.exit() 
         #----
         # save data
-        newdf.to_csv(tmpdir+filename,index=True, na_rep='NAN')
 
-        fla = tmpdir+os.path.splitext(filename)[0]
-        addheaders(fla,fla+'.2',head[0],0)
-        addheaders(fla+'.2',fla+'.3',head[2],2)
-        addheaders(fla+'.3',outdir+newfile,head[3],3)
+        print('save')
+        print(newdf)
+        save_csv_file(newdf,outdir,iyr,locname,head)
+
 
         del df
         del newdf
-        del timeframe
         del timestamp
-        del newfile
         del head
         del tmp
  
-print('end')
 
