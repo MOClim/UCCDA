@@ -180,7 +180,7 @@ for it in range(0,len(allyears)):
        df2['SiteNum']=stid.values
 
        # Extract data from header name "Year" to "XMTPWR"
-       tmp = df.loc[:,'Year':'XMTPWR']
+       tmp = df.loc[:,'HrMin':'XMTPWR']
        tmp[tlabel] = timestamp
        tmp.set_index(tlabel, inplace=True)
 
