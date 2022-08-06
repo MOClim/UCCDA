@@ -8,6 +8,7 @@ import matplotlib.dates as mdates
 import calendar
 import shutil
 import os
+import sys
 from datetime import datetime, date
 
 def pickup_timename_today(timestamp): 
@@ -59,36 +60,42 @@ def dayofY_toTimeStamp(df,deltt):
 
 #---------------------------------------- 
 
-columname = ["SiteNum","Year","Day_of_Year","HrMin","Lat","Lon","VersionNum","TAIR1(1)","TAIR1(2)","TAIR1(3)","TAIR1(4)","TAIR1(5)","TAIR1(6)","TAIR1(7)","TAIR1(8)","TAIR1(9)","TAIR1(10)","TAIR1(11)","TAIR1(12)","TAIR2(1)","TAIR2(2)","TAIR2(3)","TAIR2(4)","TAIR2(5)","TAIR2(6)","TAIR2(7)","TAIR2(8)","TAIR2(9)","TAIR2(10)","TAIR2(11)","TAIR2(12)","TAIR3(1)","TAIR3(2)","TAIR3(3)","TAIR3(4)","TAIR3(5)","TAIR3(6)","TAIR3(7)","TAIR3(8)","TAIR3(9)","TAIR3(10)","TAIR3(11)","TAIR3(12)","VWPCP1(1)","VWPCP1(2)","VWPCP1(3)","VWPCP1(4)","VWPCP1(5)","VWPCP1(6)","VWPCP1(7)","VWPCP1(8)","VWPCP1(9)","VWPCP1(10)","VWPCP1(11)","VWPCP1(12)","VWPCP2(1)","VWPCP2(2)","VWPCP2(3)","VWPCP2(4)","VWPCP2(5)","VWPCP2(6)","VWPCP2(7)","VWPCP2(8)","VWPCP2(9)","VWPCP2(10)","VWPCP2(11)","VWPCP2(12)","VWPCP3(1)","VWPCP3(2)","VWPCP3(3)","VWPCP3(4)","VWPCP3(5)","VWPCP3(6)","VWPCP3(7)","VWPCP3(8)","VWPCP3(9)","VWPCP3(10)","VWPCP3(11)","VWPCP3(12)","WET1(1)","WET1(2)","WET1(3)","WET1(4)","WET1(5)","WET1(6)","WET1(7)","WET1(8)","WET1(9)","WET1(10)","WET1(11)","WET1(12)","WET2(1)","WET2(2)","WET2(3)","WET2(4)","WET2(5)","WET2(6)","WET2(7)","WET2(8)","WET2(9)","WET2(10)","WET2(11)","WET2(12)","TAIR1_5mn_Min","TAIR2_5mn_Min","TAIR3_5mn_Min","TAIR1_5mn_Max","TAIR2_5mn_Max","TAIR3_5mn_Max","T1Cal_Std","T2Cal_Std","T3Cal_Std","FANSP1_Avg","FANSP2_Avg","BATVolt_Avg","PSVoltFL","DoorTime_Tot","TPRECP_Max","RefRes_Avg","DSignTR","TotHTR","TotDoor","XMTPWF","XMTPWR","unknown"]
+indir0 = 'output/'
+outdir0 = 'output.v02/'
 
-indir0 = 'data/'
-outdir0 = 'output/'
+#indir0 = 'input/'
+#outdir0 = 'output/'
 
 tmpdir = 'tmp/'
 
-allnames = pd.Series([elem.replace(indir0,'') for elem in pd.Series(glob.glob(indir0+"*"))])
+allyears = pd.Series([elem.replace(indir0,'') for elem in pd.Series(glob.glob(indir0+"*"))])
+print(allyears)
 
-for iloc in range(0,len(allnames)):
+for it in range(0,len(allyears)):
+ 
+  iyr = allyears[it]
 
-    locname = allnames.iloc[iloc]
+  findir = indir0 + iyr + "/"
+  alllocates = pd.Series([elem.replace(findir,'') for elem in pd.Series(glob.glob(findir+"*"))])
+  print(alllocates)
 
-    indir = indir0+locname+'/'
-    lst = pd.Series([elem.replace(indir,'') for elem in pd.Series(glob.glob(indir+"*"))])
+  for ii in range(0,len(alllocates)):
 
-    for filename in lst:
+        locatename = os.path.splitext(alllocates.iloc[ii])[0]
+        print(locatename)
 
         #print(' ----- Read CSV file ------')
-        df = pd.read_csv(indir+filename \
-          , delimiter = ',', na_values = ['NAN','"NAN"'], header=None, low_memory=False)
+        df = pd.read_csv(findir + '/'+ locatename +'.csv'\
+          , delimiter = ',', skiprows=[0,2,3], na_values = ['NAN','"NAN"'], header=0, low_memory=False)
+        print(df)
 
         #--- add additional information of headers ----
 
-        df.columns = columname
         stid = df.SiteNum
 
-        hfile = '../headerlist/'+str(stid.iloc[0])+'.csv'
+        hfile = findir+locatename+'.csv'
         with open(hfile, "r") as infile:
-             head = list(csv.reader(infile))
+            head = list(csv.reader(infile))[0:4]
 
         # --- create timestamp
 
@@ -119,9 +126,8 @@ for iloc in range(0,len(allnames)):
 
         timeframe = pickup_timename(timestamp)   
 
-        outdir = outdir0+'reformat/'+locname + '/'
-        newfile = 'USCRN_Hr_TBL_'+ timeframe
-
+        outdir = outdir0+iyr+'/'
+        sys.exit() 
         #----
         # save data
         newdf.to_csv(tmpdir+filename,index=True, na_rep='NAN')

@@ -206,6 +206,7 @@ for it in range(0,len(allyears)):
     #----
 
     print('save')
+    newdf.set_index(tlabel,inplace=True)
     print(newdf)
     save_csv_file(newdf,outdir,iyr,locname,head)
 
