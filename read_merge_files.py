@@ -157,6 +157,7 @@ for it in range(0,len(allyears)):
        #print(' ----- Read CSV file ------')
        df = pd.read_csv(findir+filename+'.csv' \
           , delimiter = ',', skiprows=[0,2,3], na_values = ['NAN','"NAN"'],header=0)
+       print(df)
        #--- add additional information of headers ----
 
        stid = df.SiteNum
@@ -179,15 +180,17 @@ for it in range(0,len(allyears)):
        df2['RECORD']=df.loc[:,'RECORD'].values
        df2['SiteNum']=stid.values
 
-       # Extract data from header name "Year" to "XMTPWR"
-       tmp = df.loc[:,'HrMin':'XMTPWR']
+       # Extract data from header name "Year" or "HrMin" to "XMTPWR"
+       isel = df.columns[3]
+       tmp = df.loc[:,isel:'XMTPWR']
        tmp[tlabel] = timestamp
        tmp.set_index(tlabel, inplace=True)
-
+       
        # Concatenating two datasets along with the column (axis=1)
        df2 = pd.concat([df2,tmp],axis=1)
        del tmp
        del df
+       del isel
 
        if ii==0:
           dat = df2
